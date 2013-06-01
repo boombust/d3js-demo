@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>BoomBust demo - business creation and destruction</title>
+  <style>
+
+.australia path { stroke: #000000; }
+
+/*
+#NT { fill: #ffff00; }
+#SA { fill: #00ffff; }
+#QL { fill: #cc00ff; }
+#TS { fill: #ff0099; }
+#VI { fill: #00ff00; }
+#CT { fill: #0000ff; }
+#NS { fill: #cc0099; }
+#WA { fill: #0000cc; }
+*/
+
+.decile-0 { fill:rgb(247,251,255); }
+.decile-1 { fill:rgb(222,235,247); }
+.decile-2 { fill:rgb(198,219,239); }
+.decile-3 { fill:rgb(158,202,225); }
+.decile-4 { fill:rgb(107,174,214); }
+.decile-5 { fill:rgb(66,146,198); }
+.decile-6 { fill:rgb(33,113,181); }
+.decile-7 { fill:rgb(8,81,156); }
+.decile-8 { fill:rgb(8,48,107); }
+
+a.active { font-weight: bold; }
+
+  </style>
+</head>
+<body>
+
+<div id="controls"></div>
+
+<script src="jquery-2.0.2.min.js"></script>
+<script src="d3.v3.min.js"></script>
+<script src="topojson.v1.min.js"></script>
+<script>
+
+var width = 960;
+var height = 500;
+
+// var rateById = d3.map();
+
+var quantize = d3.scale.quantize()
+    .domain([40, 80])
+    .range(d3.range(9).map(function(i) { return "decile-" + i; }));
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+
+var slices = ['0809to10', '0809to11', '0809to12']
+// var current_slice = slices[0];
+var state_objects;
+
+
+var redraw = function(current_slice) {
+  svg.selectAll("g").selectAll("path")
+    .attr("class", function(d) { return quantize(all_data[d.id][current_slice]); });
+
+  $('#controls a').each(function(i, el) {
+    if (el.innerHTML == current_slice) {
+      $(el).addClass('active');
+    } else {
+      $(el).removeClass('active');
+    }
+  });
+}
+
+
+var all_data = {};
+
+$(function() {
+  var control_links = [];
+  slices.forEach(function(slice_name) {
+    control_links.push("<a href=\"#\">" + slice_name + "</a>");
+  });
+  $('#controls').append(control_links.join(" | "));
+  $('#controls').on('click', function(e) {
+    e.preventDefault();
+    if (e.target.tagName === 'A') {
+      // current_slice = e.target.innerHTML;
+      redraw(e.target.innerHTML);
+    }
+  });
+
+  d3.json("australia.json", function(map) {
+    d3.csv("business_survival.csv", function(data) {
+
+      data.forEach(function(item) {
+        all_data[item.id] = item;
+      });
+      console.log(all_data);
+
+      var projection = d3.geo.mercator()
+          .center([133.8, -25.3])
+          //.rotate([4.4, 0])
+          //.parallels([50, 60])
+          .scale(600)
+          .translate([width / 2, height / 2]);
+
+      var path = d3.geo.path()
+          .projection(projection);
+
+      svg.append("g")
+          .attr("class", "australia")
+        .selectAll("path")
+          .data(topojson.feature(map, map.objects.australia).features)
+        .enter().append("path")
+          .attr("id", function(d) { return d.id; })
+          .attr("d", path);
+
+      redraw(slices[0]);
+
+   });
+  });
+});
+</script>
+</body>
+</html>
