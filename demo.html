@@ -9,11 +9,11 @@
 /*
 #NT { fill: #ffff00; }
 #SA { fill: #00ffff; }
-#QL { fill: #cc00ff; }
-#TS { fill: #ff0099; }
-#VI { fill: #00ff00; }
-#CT { fill: #0000ff; }
-#NS { fill: #cc0099; }
+#Qld { fill: #cc00ff; }
+#Tas { fill: #ff0099; }
+#Vic { fill: #00ff00; }
+#ACT { fill: #0000ff; }
+#NSW { fill: #cc0099; }
 #WA { fill: #0000cc; }
 */
 
@@ -43,7 +43,6 @@ a.active { font-weight: bold; }
 var width = 960;
 var height = 500;
 
-// var rateById = d3.map();
 
 var quantize = d3.scale.quantize()
     .domain([40, 80])
@@ -55,7 +54,6 @@ var svg = d3.select("body").append("svg")
 
 
 var slices = ['0809to10', '0809to11', '0809to12']
-// var current_slice = slices[0];
 var state_objects;
 
 
