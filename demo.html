@@ -17,16 +17,17 @@
 #WA { fill: #0000cc; }
 */
 
-.decile-0 { fill:rgb(247,251,255); }
-.decile-1 { fill:rgb(222,235,247); }
-.decile-2 { fill:rgb(198,219,239); }
-.decile-3 { fill:rgb(158,202,225); }
-.decile-4 { fill:rgb(107,174,214); }
-.decile-5 { fill:rgb(66,146,198); }
-.decile-6 { fill:rgb(33,113,181); }
-.decile-7 { fill:rgb(8,81,156); }
-.decile-8 { fill:rgb(8,48,107); }
+.decile-0 { fill: rgb(247,251,255); background: rgb(247,251,255); }
+.decile-1 { fill: rgb(222,235,247); background: rgb(222,235,247); }
+.decile-2 { fill: rgb(198,219,239); background: rgb(198,219,239); }
+.decile-3 { fill: rgb(158,202,225); background: rgb(158,202,225); }
+.decile-4 { fill: rgb(107,174,214); background: rgb(107,174,214); }
+.decile-5 { fill: rgb(66,146,198); background: rgb(66,146,198); }
+.decile-6 { fill: rgb(33,113,181); background: rgb(33,113,181); }
+.decile-7 { fill: rgb(8,81,156); background: rgb(8,81,156); }
+.decile-8 { fill: rgb(8,48,107); background: rgb(8,48,107); }
 
+.legend_block { display: inline-block; width: 20px; height: 20px; line-height: 20px; text-align: center; font-size: 11px; }
 a.active { font-weight: bold; }
 
   </style>
@@ -34,6 +35,7 @@ a.active { font-weight: bold; }
 <body>
 
 <div id="controls"></div>
+<div id="legend"></div>
 
 <script src="jquery-2.0.2.min.js"></script>
 <script src="d3.v3.min.js"></script>
@@ -42,19 +44,15 @@ a.active { font-weight: bold; }
 
 var width = 960;
 var height = 500;
+var state_objects;
 
-
-var quantize = d3.scale.quantize()
-    .domain([40, 80])
-    .range(d3.range(9).map(function(i) { return "decile-" + i; }));
+var value_range;
+var slices;
+var quantize;
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
-
-
-var slices = ['0809to10', '0809to11', '0809to12']
-var state_objects;
 
 
 var redraw = function(current_slice) {
@@ -62,18 +60,17 @@ var redraw = function(current_slice) {
     .attr("class", function(d) { return quantize(all_data[d.id][current_slice]); });
 
   $('#controls a').each(function(i, el) {
-    if (el.innerHTML == current_slice) {
-      $(el).addClass('active');
+    el = $(el);
+    if (el.html() == current_slice) {
+      el.addClass('active');
     } else {
-      $(el).removeClass('active');
+      el.removeClass('active');
     }
   });
 }
 
 
-var all_data = {};
-
-$(function() {
+var drawControls = function() {
   var control_links = [];
   slices.forEach(function(slice_name) {
     control_links.push("<a href=\"#\">" + slice_name + "</a>");
@@ -86,13 +83,47 @@ $(function() {
       redraw(e.target.innerHTML);
     }
   });
+}
 
+
+var drawLegend = function() {
+  var legend_output = '';
+
+  var min = value_range[0];
+  var max = value_range[1];
+  for (var i = min; i < max; i += Math.floor((max - min)/10)) {
+    legend_output += "<span class=\"legend_block " + quantize(i) + "\">" + i + "</span>";
+  }
+
+  $('#legend').html(legend_output);
+}
+
+
+var all_data = {};
+
+$(function() {
   d3.json("australia.json", function(map) {
-    d3.csv("business_survival.csv", function(data) {
+    d3.csv("entering_exad.csv", function(data) {
+      var time_keys = {};
+      var max, min;
 
       data.forEach(function(item) {
         all_data[item.id] = item;
+
+        for (var key in item) {
+          if (key == 'id') { continue; }
+          time_keys[key] = true;
+          if (!max) { max = 1 * item[key]; }
+          if (!min) { min = 1 * item[key]; }
+          if (item[key] > max) { max = 1 * item[key]; }
+          if (item[key] < min) { min = 1 * item[key]; }
+        }
       });
+
+      var delta = Math.floor((Math.ceil(max) - Math.floor(min))/10) + 1;
+
+      slices = Object.keys(time_keys);
+      value_range = [Math.floor(min), Math.floor(min + 10*delta)];
       console.log(all_data);
 
       var projection = d3.geo.mercator()
@@ -101,6 +132,10 @@ $(function() {
           //.parallels([50, 60])
           .scale(600)
           .translate([width / 2, height / 2]);
+
+      quantize = d3.scale.quantize()
+          .domain(value_range)
+          .range(d3.range(9).map(function(i) { return "decile-" + i; }));
 
       var path = d3.geo.path()
           .projection(projection);
@@ -113,6 +148,8 @@ $(function() {
           .attr("id", function(d) { return d.id; })
           .attr("d", path);
 
+      drawControls();
+      drawLegend();
       redraw(slices[0]);
 
    });
