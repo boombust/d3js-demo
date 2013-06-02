@@ -24,6 +24,38 @@
   .decile-7 { fill: rgb(8,81,156); background: rgb(8,81,156); }
   .decile-8 { fill: rgb(8,48,107); background: rgb(8,48,107); }
 
-  .legend_block { display: inline-block; width: 60px; height: 20px; line-height: 20px; text-align: center; font-size: 11px; }
+  span.decile-6, span.decile-7, span.decile-8 { color: #fff; }
+
+  .legend_block { display: inline-block; width: 60px; height: 20px; line-height: 20px; text-align: center; font-size: 11px; vertical-align: top; }
   a.active { font-weight: bold; }
 
+
+#floating_description {
+  position: absolute;
+  top: 50px;
+  left: 20px;
+  background: #ccc;
+  opacity: 0.9;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#legend {
+  position: absolute;
+  bottom: 70px;
+  left: 20px;
+  box-shadow: 0 2px 25px rgba(32,32,32,0.9);
+  height: 20px;
+  line-height: 20px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
