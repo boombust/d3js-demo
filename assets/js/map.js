@@ -2,19 +2,64 @@
 var width = window.innerWidth - 6;
 var height = window.innerHeight - 6;
 
-var value_range;
 var slices;
 var quantize;
 var svg;
 
 
-var current_dataset = 0;
+var current_dataset;
 
 var datasets = [
   {
+    name: "BoomBust Index",
+    file: "data/BBI_annual.csv",
+    scale: [-1.5, 1.5],
+    description: "Our secret-sauce index of economic boom or bust"
+  },
+  {
     name: "Motor Vehicle Ownership",
-    file: "data/MotorVehiclesDeltas.csv",
+    files: {
+      "ACT": "data/MotorVehiclesDeltas.ACT.csv",
+      "NSW": "data/MotorVehiclesDeltas.NSW.csv",
+      "NT": "data/MotorVehiclesDeltas.NT.csv",
+      "Qld": "data/MotorVehiclesDeltas.Qld.csv",
+      "SA": "data/MotorVehiclesDeltas.SA.csv",
+      "Tas": "data/MotorVehiclesDeltas.Tas.csv",
+      "Vic": "data/MotorVehiclesDeltas.Vic.csv",
+      "WA": "data/MotorVehiclesDeltas.WA.csv"
+    },
+    scale: [0, 0.02],
     description: "Share of national motor ownership for each region"
+  },
+  {
+    name: "Taxable Income",
+    files: {
+      "ACT": "data/TaxableIncomeDeltas.ACT.csv",
+      "NSW": "data/TaxableIncomeDeltas.NSW.csv",
+      "NT": "data/TaxableIncomeDeltas.NT.csv",
+      "Qld": "data/TaxableIncomeDeltas.Qld.csv",
+      "SA": "data/TaxableIncomeDeltas.SA.csv",
+      "Tas": "data/TaxableIncomeDeltas.Tas.csv",
+      "Vic": "data/TaxableIncomeDeltas.Vic.csv",
+      "WA": "data/TaxableIncomeDeltas.WA.csv"
+    },
+    scale: [0.5, 1.5],
+    description: "Ratio of the average taxable income in one region to the others"
+  },
+  {
+    name: "Unemployment",
+    files: {
+      "ACT": "data/UnemploymentDeltas.ACT.csv",
+      "NSW": "data/UnemploymentDeltas.NSW.csv",
+      "NT": "data/UnemploymentDeltas.NT.csv",
+      "Qld": "data/UnemploymentDeltas.Qld.csv",
+      "SA": "data/UnemploymentDeltas.SA.csv",
+      "Tas": "data/UnemploymentDeltas.Tas.csv",
+      "Vic": "data/UnemploymentDeltas.Vic.csv",
+      "WA": "data/UnemploymentDeltas.WA.csv"
+    },
+    scale: [0, 40],
+    description: "Percentage unemployment in each statistical region"
   }
 ];
 
@@ -78,8 +123,8 @@ var drawControls = function() {
 var drawLegend = function() {
 	var legend_output = '';
 
-	var min = value_range[0];
-	var max = value_range[1];
+	var min = datasets[current_dataset].scale[0];
+	var max = datasets[current_dataset].scale[1];
 	for (var i = min; i < max; i += (max - min)/10) {
 		legend_output += "<span class=\"legend_block " + quantize(i) + "\">" + i.toFixed( 3) + "</span>";
 	}
@@ -141,23 +186,32 @@ var maps = {
 
 
 var init = function(city, dataset_id) {
+  current_dataset = dataset_id;
+
   svg = d3.select("#map").append("svg")
     .attr("width", width)
     .attr("height", height);
 
 	d3.json(maps[city].map.file, function(map) {
-		d3.csv(datasets[dataset_id].file, function(data) {
+
+	  if (datasets[dataset_id].files) {
+	    var data_filename = datasets[dataset_id].files[maps[city].state];
+	  } else {
+	    var data_filename = datasets[dataset_id].file;
+	  }
+
+		d3.csv(data_filename, function(data) {
 			var time_keys = {};
 			var max, min;
 
 			data.forEach(function(item) {
-				if (item.State !== maps[city].state) { return; }
+				// if (item.State !== maps[city].state) { return; }
 
 				var id = item['ASGC.2008.Code'];
 				all_data[id] = {};
 
 				for (var key in item) {
-					if (key.substr(0,1) !== 'X') { continue; }
+					if (key.substr(0,1) !== 'X' && key.substr(0,3) !== 'Jun') { continue; }
 					time_keys[key] = true;
 					all_data[id][key] = item[key];
 
@@ -172,8 +226,6 @@ var init = function(city, dataset_id) {
       // var delta = (max - min)/10;
 
       slices = Object.keys(time_keys);
-      // value_range = [min, min + 10*delta];
-      value_range = [0, 0.02];
 
       var projection = d3.geo.mercator()
         .center(maps[city].map.center)
@@ -181,7 +233,7 @@ var init = function(city, dataset_id) {
         .translate([width / 2, height / 2]);
 
       quantize = d3.scale.quantize()
-        .domain(value_range)
+        .domain(datasets[current_dataset].scale)
         .range(d3.range(9).map(function(i) { return "decile-" + i; }));
 
       var path = d3.geo.path()
@@ -205,5 +257,5 @@ var init = function(city, dataset_id) {
 }
 
 $(function() {
-  init("Perth", 0);
+  init("Perth", 1);
 });
