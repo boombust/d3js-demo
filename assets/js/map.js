@@ -8,6 +8,17 @@ var quantize;
 var svg;
 
 
+var current_dataset = 0;
+
+var datasets = [
+  {
+    name: "Motor Vehicle Ownership",
+    file: "data/MotorVehiclesDeltas.csv",
+    description: "Share of national motor ownership for each region"
+  }
+];
+
+
 var redraw = function(current_slice) {
 	svg.selectAll("g").selectAll("path")
     .attr("class", function(d) { return quantize(all_data[d.id][current_slice]); });
@@ -24,20 +35,24 @@ var redraw = function(current_slice) {
 
 
 var drawCityLinks = function(current_city) {
-	var control_links = [];
-	var link_names = Object.keys(datasets);
+	var link_html = '';
+	var link_names = Object.keys(maps);
+
+  $('#floating_description h1').html(current_city + ' ' + datasets[current_dataset].name);
+  $('#floating_description p').html(datasets[current_dataset].description);
 
 	link_names.forEach(function(link) {
 	  var cls = '';
 	  if (link == current_city) { cls = " class=\"active\""; }
-		control_links.push("<a href=\"#" + link + "\"" + cls + ">" + link + "</a>");
+		link_html += "<li" + cls + "><a href=\"#" + link + "\">" + link + "</a></li>";
 	});
-  $('#city_links').html(control_links.join(" | "));
+  $('#city_links').html(link_html);
+
   $('#city_links').on('click', function(e) {
     e.preventDefault();
     if (e.target.tagName === 'A') {
       svg.remove();
-      init(e.target.innerHTML, "data/MotorVehiclesDeltas.csv");
+      init(e.target.innerHTML, current_dataset);
     }
   });
 }
@@ -76,7 +91,7 @@ var drawLegend = function() {
 var all_data = {};
 
 
-var datasets = {
+var maps = {
   "Perth" : {
     state: "WA",
     map: {
@@ -125,18 +140,18 @@ var datasets = {
 }
 
 
-var init = function(city, data_file) {
+var init = function(city, dataset_id) {
   svg = d3.select("#map").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-	d3.json(datasets[city].map.file, function(map) {
-		d3.csv(data_file, function(data) {
+	d3.json(maps[city].map.file, function(map) {
+		d3.csv(datasets[dataset_id].file, function(data) {
 			var time_keys = {};
 			var max, min;
 
 			data.forEach(function(item) {
-				if (item.State !== datasets[city].state) { return; }
+				if (item.State !== maps[city].state) { return; }
 
 				var id = item['ASGC.2008.Code'];
 				all_data[id] = {};
@@ -161,8 +176,8 @@ var init = function(city, data_file) {
       value_range = [0, 0.02];
 
       var projection = d3.geo.mercator()
-        .center(datasets[city].map.center)
-        .scale(datasets[city].map.scale)
+        .center(maps[city].map.center)
+        .scale(maps[city].map.scale)
         .translate([width / 2, height / 2]);
 
       quantize = d3.scale.quantize()
@@ -175,7 +190,7 @@ var init = function(city, data_file) {
       svg.append("g")
         .attr("class", "city")
         .selectAll("path")
-        .data(topojson.feature(map, map.objects[datasets[city].map.obj_name]).features)
+        .data(topojson.feature(map, map.objects[maps[city].map.obj_name]).features)
         .enter().append("path")
         .attr("id", function(d) { return d.id; })
         .attr("d", path);
@@ -190,5 +205,5 @@ var init = function(city, data_file) {
 }
 
 $(function() {
-  init("Perth", "data/MotorVehiclesDeltas.csv");
+  init("Perth", 0);
 });
