@@ -4,19 +4,6 @@
   <title>BoomBust demo - business creation and destruction</title>
   <style>
 
-/* .australia path { stroke: #000000; } */
-
-/*
-#NT { fill: #ffff00; }
-#SA { fill: #00ffff; }
-#Qld { fill: #cc00ff; }
-#Tas { fill: #ff0099; }
-#Vic { fill: #00ff00; }
-#ACT { fill: #0000ff; }
-#NSW { fill: #cc0099; }
-#WA { fill: #0000cc; }
-*/
-
 .decile-0 { fill: rgb(247,251,255); background: rgb(247,251,255); }
 .decile-1 { fill: rgb(222,235,247); background: rgb(222,235,247); }
 .decile-2 { fill: rgb(198,219,239); background: rgb(198,219,239); }
@@ -103,13 +90,13 @@ var drawLegend = function() {
 var all_data = {};
 
 $(function() {
-  d3.json("maps/wa-perth.json", function(map) {
-    d3.csv("MotorVehiclesDeltas.csv", function(data) {
+  d3.json("maps/nsw-sydney.json", function(map) {
+    d3.csv("data/MotorVehiclesDeltas.csv", function(data) {
       var time_keys = {};
       var max, min;
 
       data.forEach(function(item) {
-        if (item.State !== 'WA') { return; }  // for now
+        if (item.State !== 'NSW') { return; }  // for now
 
         var id = item['ASGC.2008.Code'];
         all_data[id] = {};
@@ -118,27 +105,16 @@ $(function() {
           if (key.substr(0,1) !== 'X') { continue; }
           time_keys[key] = true;
           all_data[id][key] = item[key];
-
-          // if (!max) { max = 1 * item[key]; }
-          // if (!min) { min = 1 * item[key]; }
-          // if (item[key] > max) { max = 1 * item[key]; }
-          // if (item[key] < min) { min = 1 * item[key]; }
         }
       });
 
-      // var delta = Math.floor((Math.ceil(max) - Math.floor(min))/10) + 1;
-      // var delta = (max - min)/10;
-
       slices = Object.keys(time_keys);
-      // value_range = [min, min + 10*delta];
       value_range = [0, 0.02];
       console.log(all_data);
 
       var projection = d3.geo.mercator()
-          .center([115.85, -31.95])
-          //.rotate([4.4, 0])
-          //.parallels([50, 60])
-          .scale(50000)
+          .center([151.22, -33.85])
+          .scale(70000)
           .translate([width / 2, height / 2]);
 
       quantize = d3.scale.quantize()
@@ -151,7 +127,7 @@ $(function() {
       svg.append("g")
           .attr("class", "australia")
         .selectAll("path")
-          .data(topojson.feature(map, map.objects["WA-perth"]).features)
+          .data(topojson.feature(map, map.objects["NSW-sydney"]).features)
         .enter().append("path")
           .attr("id", function(d) { return d.id; })
           .attr("d", path);
