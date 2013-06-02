@@ -6,8 +6,8 @@ var slices;
 var quantize;
 var svg;
 
-
 var current_dataset;
+
 
 var datasets = [
   {
@@ -102,6 +102,33 @@ var drawCityLinks = function(current_city) {
   });
 }
 
+
+var drawDataSelector = function() {
+  var form_html = "<select id=\"\">";
+
+  datasets.forEach(function(dataset, i) {
+    form_html += "<option value=\"" + i + "\" title=\"" + dataset.description + "\""
+
+    if (current_dataset == i) {
+      form_html += " selected=\"selected\"";
+    }
+
+    form_html += ">" + dataset.name + "</option>";
+  });
+
+  form_html += "</select>";
+
+  $('#dataset_switcher').html(form_html);
+
+  $('#dataset_switcher select').on('change', function(e) {
+      svg.remove();
+
+      var current_city = $('#city_links .active a').html();
+      var new_val = $('#dataset_switcher select').val();
+
+      init(current_city, new_val);
+  });
+}
 
 
 var drawControls = function() {
@@ -247,9 +274,11 @@ var init = function(city, dataset_id) {
         .attr("id", function(d) { return d.id; })
         .attr("d", path);
 
+      drawDataSelector();
       drawCityLinks(city);
       drawControls();
       drawLegend();
+
       redraw(slices[0]);
 
     });
@@ -257,5 +286,5 @@ var init = function(city, dataset_id) {
 }
 
 $(function() {
-  init("Perth", 1);
+  init("Perth", 0);
 });

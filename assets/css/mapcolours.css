@@ -2,6 +2,9 @@
   body { font-family: "Source Sans Pro", sans-serif; }
 
 
+  .navbar-inner .container { position: relative; }
+  .navbar-inner form { position: absolute; right: 0; top: 5px; text-align: right; }
+
   .brand { display: inline-block; width: 188px; margin-right: 20px; height: 10px; position: relative; }
   .brand img { position: absolute; }
 
