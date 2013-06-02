@@ -5,10 +5,7 @@ var height = window.innerHeight - 6;
 var value_range;
 var slices;
 var quantize;
-
-var svg = d3.select("#map").append("svg")
-  .attr("width", width)
-  .attr("height", height);
+var svg;
 
 
 var redraw = function(current_slice) {
@@ -26,12 +23,33 @@ var redraw = function(current_slice) {
 }
 
 
+var drawCityLinks = function(current_city) {
+	var control_links = [];
+	var link_names = Object.keys(datasets);
+
+	link_names.forEach(function(link) {
+	  var cls = '';
+	  if (link == current_city) { cls = " class=\"active\""; }
+		control_links.push("<a href=\"#" + link + "\"" + cls + ">" + link + "</a>");
+	});
+  $('#city_links').html(control_links.join(" | "));
+  $('#city_links').on('click', function(e) {
+    e.preventDefault();
+    if (e.target.tagName === 'A') {
+      svg.remove();
+      init(e.target.innerHTML, "data/MotorVehiclesDeltas.csv");
+    }
+  });
+}
+
+
+
 var drawControls = function() {
 	var control_links = [];
 	slices.forEach(function(slice_name) {
 		control_links.push("<a href=\"#\">" + slice_name + "</a>");
 	});
-  $('#controls').append(control_links.join(" | "));
+  $('#controls').html(control_links.join(" | "));
   $('#controls').on('click', function(e) {
     e.preventDefault();
     if (e.target.tagName === 'A') {
@@ -59,7 +77,7 @@ var all_data = {};
 
 
 var datasets = {
-  "perth" : {
+  "Perth" : {
     state: "WA",
     map: {
       file: "maps/wa-perth.json",
@@ -68,7 +86,7 @@ var datasets = {
       scale: 50000
     }
   },
-  "sydney" : {
+  "Sydney" : {
     state: "NSW",
     map: {
       file: "maps/nsw-sydney.json",
@@ -77,7 +95,7 @@ var datasets = {
       scale: 70000
     }
   },
-  "melbourne" : {
+  "Melbourne" : {
     state: "Vic",
     map: {
       file: "maps/vic-melbourne.json",
@@ -86,7 +104,7 @@ var datasets = {
       scale: 70000
     }
   },
-  "brisbane" : {
+  "Brisbane" : {
     state: "Qld",
     map: {
       file: "maps/qld-brisbane.json",
@@ -95,7 +113,7 @@ var datasets = {
       scale: 25000
     }
   },
-  "adelaide" : {
+  "Adelaide" : {
     state: "SA",
     map: {
       file: "maps/sa-adelaide.json",
@@ -108,6 +126,10 @@ var datasets = {
 
 
 var init = function(city, data_file) {
+  svg = d3.select("#map").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
 	d3.json(datasets[city].map.file, function(map) {
 		d3.csv(data_file, function(data) {
 			var time_keys = {};
@@ -158,6 +180,7 @@ var init = function(city, data_file) {
         .attr("id", function(d) { return d.id; })
         .attr("d", path);
 
+      drawCityLinks(city);
       drawControls();
       drawLegend();
       redraw(slices[0]);
@@ -167,5 +190,5 @@ var init = function(city, data_file) {
 }
 
 $(function() {
-  init("perth", "data/MotorVehiclesDeltas.csv");
+  init("Perth", "data/MotorVehiclesDeltas.csv");
 });
