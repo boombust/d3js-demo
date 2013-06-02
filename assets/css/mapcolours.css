@@ -1,6 +1,8 @@
-  
-  /* .australia path { stroke: #000000; } */
-  
+
+  body { font-family: "Source Sans Pro", sans-serif; }
+
+  .city path { stroke: #e0e0e0; }
+
   /*
    # NT { fill*: #ffff00; }
    #SA { fill: #00ffff; }
@@ -11,7 +13,7 @@
    #NSW { fill: #cc0099; }
    #WA { fill: #0000cc; }
    */
-  
+
   .decile-0 { fill: rgb(247,251,255); background: rgb(247,251,255); }
   .decile-1 { fill: rgb(222,235,247); background: rgb(222,235,247); }
   .decile-2 { fill: rgb(198,219,239); background: rgb(198,219,239); }
@@ -21,7 +23,7 @@
   .decile-6 { fill: rgb(33,113,181); background: rgb(33,113,181); }
   .decile-7 { fill: rgb(8,81,156); background: rgb(8,81,156); }
   .decile-8 { fill: rgb(8,48,107); background: rgb(8,48,107); }
-  
+
   .legend_block { display: inline-block; width: 60px; height: 20px; line-height: 20px; text-align: center; font-size: 11px; }
   a.active { font-weight: bold; }
-  
+

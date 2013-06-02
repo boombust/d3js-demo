@@ -151,7 +151,7 @@ var init = function(city, data_file) {
         .projection(projection);
 
       svg.append("g")
-        .attr("class", "australia") // TODO: rename, no longer a state map
+        .attr("class", "city")
         .selectAll("path")
         .data(topojson.feature(map, map.objects[datasets[city].map.obj_name]).features)
         .enter().append("path")
