@@ -1,6 +1,11 @@
 
   body { font-family: "Source Sans Pro", sans-serif; }
 
+
+  .brand { display: inline-block; width: 188px; margin-right: 20px; height: 10px; position: relative; }
+  .brand img { position: absolute; }
+
+
   .city path { stroke: #e0e0e0; }
 
   /*
