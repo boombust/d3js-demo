@@ -98,6 +98,8 @@ var drawCityLinks = function(current_city) {
     if (e.target.tagName === 'A') {
       svg.remove();
       init(e.target.innerHTML, current_dataset);
+	  // google analytics tracking the map redraw
+	  ga('send', 'event', 'map', 'draw', e.target.innerHTML);
     }
   });
 }
